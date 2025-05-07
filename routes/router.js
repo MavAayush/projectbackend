@@ -303,26 +303,21 @@ router.post("/:id/:token",async(req,res)=>{
 
 // Update the login route
 router.post("/register-clerk-user", async(req, res) => {
-    const { fname, email, mobile, clerkId } = req.body;
+    const { clerkId } = req.body;
 
-    if(!fname || !email || !mobile || !clerkId){
-        return res.status(400).json({error:"Please fill all the required fields"});
+    if(!clerkId){
+        return res.status(400).json({error:"Please provide Clerk ID"});
     };
 
     try {
-        const preuser = await USER.findOne({email:email});
+        const preuser = await USER.findOne({clerkId: clerkId});
         
         if(preuser){
-            // If user exists with this email but different clerkId, update with new clerkId
-            if(preuser.clerkId !== clerkId) {
-                preuser.clerkId = clerkId;
-                await preuser.save();
-                return res.status(201).json(preuser);
-            }
             return res.status(201).json(preuser); // User already exists
         } else {
             const newuser = new USER({
-                fname, email, mobile, clerkId
+                clerkId,
+                carts: []
             });
 
             const storedata = await newuser.save();
