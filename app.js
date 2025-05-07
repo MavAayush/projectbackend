@@ -23,7 +23,22 @@ const orderRoutes = require("./routes/orderRoutes");
 app.use("/images", express.static(path.join(__dirname, "public/images")));
 app.use(express.json());
 app.use(cookieParser(""));
-app.use(cors());
+const allowedOrigins = [
+  "https://backendtob-bllqp16d5-mavaayushs-projects.vercel.app",
+  "https://www.keshritobacco.com",
+  "https://tob-pl9c.onrender.com",
+  "http://localhost:3000"
+];
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  credentials: true
+}));
 app.use(router);
 
 
