@@ -303,27 +303,40 @@ router.post("/:id/:token",async(req,res)=>{
 
 // Update the login route
 router.post("/register-clerk-user", async(req, res) => {
-    const { clerkId } = req.body;
+    console.log("Received register-clerk-user request with data:", req.body);
+    const { clerkId, email, mobile } = req.body;
 
     if(!clerkId){
+        console.log("No clerkId provided in request");
         return res.status(400).json({error:"Please provide Clerk ID"});
     };
 
     try {
+        console.log("Looking for existing user with clerkId:", clerkId);
         const preuser = await USER.findOne({clerkId: clerkId});
         
         if(preuser){
+            console.log("User found with clerkId:", clerkId);
             return res.status(201).json(preuser); // User already exists
         } else {
+            console.log("Creating new user with clerkId:", clerkId);
+            
+            // Generate a unique email if not provided to avoid the duplicate key error
+            const uniqueEmail = email || `${clerkId}@clerk.user`;
+            
             const newuser = new USER({
                 clerkId,
+                email: uniqueEmail,
+                mobile: mobile || `${clerkId.substring(0, 10)}`,
                 carts: []
             });
 
             const storedata = await newuser.save();
+            console.log("New user created:", storedata);
             return res.status(201).json(storedata);
         }
     } catch(error) {
+        console.error("Error registering clerk user:", error);
         return res.status(400).json({error:"Invalid details", details: error.message});
     }
 });
@@ -332,19 +345,24 @@ router.post("/register-clerk-user", async(req, res) => {
 router.get("/get-user-by-clerk", async(req, res) => {
     try {
         const clerkId = req.headers.clerkid;
+        console.log("Received get-user-by-clerk request with clerkId:", clerkId);
 
         if(!clerkId) {
+            console.log("No clerkId provided in headers");
             return res.status(400).json({error:"No Clerk ID provided"});
         }
         
         const userData = await USER.findOne({clerkId: clerkId});
         
         if(!userData) {
+            console.log("No user found with clerkId:", clerkId);
             return res.status(404).json({error:"User not found"});
         }
         
+        console.log("User found:", userData);
         res.status(200).json(userData);
     } catch(error) {
+        console.error("Error finding clerk user:", error);
         res.status(500).json({error:"Server error", details: error.message});
     }
 });

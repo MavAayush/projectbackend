@@ -6,6 +6,16 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true
     },
+    email: {
+        type: String,
+        unique: true,
+        sparse: true // This allows null/undefined values and only enforces uniqueness for non-null values
+    },
+    mobile: {
+        type: String,
+        unique: true,
+        sparse: true // This allows null/undefined values and only enforces uniqueness for non-null values
+    },
     carts: Array
 });
 
